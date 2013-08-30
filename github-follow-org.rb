@@ -5,6 +5,11 @@ require 'rest-client'
 require 'io/console'
 require 'json'
 
+def error(msg)
+  puts msg
+  exit
+end
+
 puts "Username: "
 username = gets.chomp!
 
@@ -17,11 +22,20 @@ org = gets.chomp!
 GITHUB_URL = "https://#{username}:#{password}@api.github.com"
 
 # get followers
-r = RestClient.get GITHUB_URL + "/user/following"
+begin
+  r = RestClient.get GITHUB_URL + "/user/following"
+rescue
+  error("Bad credentials!")
+end
+
 followers = JSON.parse(r.to_s).map {|u| u["login"]}
 
 # get BT members
-r = RestClient.get GITHUB_URL + "/orgs/#{org}/members"
+begin
+  r = RestClient.get GITHUB_URL + "/orgs/#{org}/members"
+rescue
+  error("Org '#{org} not found!")
+end
 members = JSON.parse(r.to_s).map {|u| u["login"]}
 
 # follow members
